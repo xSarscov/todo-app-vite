@@ -1,4 +1,5 @@
 import { Todo } from "../models/todo.model";
+import { editTodos } from "./";
 
 /**
  * 
@@ -16,7 +17,6 @@ export const createTodoHTML = (todo) => {
         <label>${description}</label>
         <button class="destroy"></button>
     </div>
-    <input class="edit" value="Create a TodoMVC template">
     `;
     const liElement = document.createElement('li');
     if (isDone) liElement.classList.add('completed');

@@ -1,6 +1,6 @@
 import todoStore, { Filters } from "../store/todo.store";
 import htmlApp from "./app.html?raw";
-import { renderTodos } from "./use-cases";
+import { editTodos, renderTodos } from "./use-cases";
 
 const ElementIds = {
     TodoList: '.todo-list',
@@ -35,15 +35,16 @@ export const app = (elementId) => {
 
     const newDescriptionInput = document.querySelector(ElementIds.NewTodoInput);
     const todoListUL = document.querySelector(ElementIds.TodoList);
+    const todoListLabels = document.querySelectorAll('label');
     const clearCompletedButton = document.querySelector(ElementIds.ClearCompletedButton);
     const filtersLi = document.querySelectorAll(ElementIds.TodoFilters);
     
 
     newDescriptionInput.addEventListener('keyup', (event) => {
-        if (event.keyCode !== 13) return;
+        if (event.key !== 'Enter') return;
         if (event.target.value.trim().length === 0) return;
 
-        todoStore.addTodo(event.target.value)
+        todoStore.addTodo(event.target.value);
         displayTodos();
         event.target.value = '';
     });
@@ -54,10 +55,45 @@ export const app = (elementId) => {
         if (event.target.className === 'destroy') {
             todoStore.deleteTodo(selectedTodoId);
             displayTodos();
-        } else {
+        } else if (event.target.className === 'toggle') {
             todoStore.toggleTodo(selectedTodoId);
             displayTodos();
         }
+
+    });
+
+    todoListUL.addEventListener('dblclick', (event) => {
+        if (event.target.tagName === 'LABEL') {
+
+            const liElement = event.target.closest('li');
+            liElement.classList.add('editing');
+            const editTodoInput = document.createElement('input');
+            editTodoInput.classList.add('edit');
+            editTodoInput.value = liElement.querySelector('label').textContent;
+            liElement.append(editTodoInput);
+            editTodoInput.focus();
+            
+            editTodoInput.addEventListener('keyup', (e) => {
+                if (e.key !== 'Enter') return;
+                if (e.target.value.trim().length === 0) return;
+
+                todoStore.editTodo(liElement.dataset.id, editTodoInput.value);
+                displayTodos();
+            });
+
+
+            const isClickingOutside = (e) => {
+                if (!e.target.closest('.editing')) {
+                    liElement.classList.remove('editing')
+                    editTodoInput.remove();
+                    document.removeEventListener('click', isClickingOutside);
+                }
+            };
+        
+            
+            document.addEventListener('click', isClickingOutside);
+        }
+        
 
     });
 
@@ -65,6 +101,7 @@ export const app = (elementId) => {
         todoStore.deleteCompleted();
         displayTodos();
     });
+
 
     filtersLi.forEach(filterElement => {
         filterElement.addEventListener('click', (filterElement) => {

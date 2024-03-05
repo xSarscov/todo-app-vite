@@ -54,6 +54,17 @@ const addTodo = (description) => {
     saveStateToLocalStorage();
 }
 
+const editTodo = (todoId, description) => {
+    const todoIndex = state.todos.findIndex(todo => todo.id === todoId);
+
+    if (todoIndex !== -1) {
+        state.todos[todoIndex].description = description;
+        saveStateToLocalStorage();
+    } else {
+        throw new Error("Todo object provided does not exist");
+    }
+}
+
 const toggleTodo = (todoId) => {
     const todoIndex = state.todos.findIndex(todo => todo.id === todoId);
 
@@ -99,6 +110,7 @@ export default {
     loadStore,
     getTodos,
     addTodo,
+    editTodo,
     toggleTodo,
     deleteTodo,
     deleteCompleted,
