@@ -1,11 +1,10 @@
 /**
- * 
- * @param {HTMLLIElement} liElement 
+ * Modifies the HTML of the to-do list element (liElement) to activate edit mode.
+ * @param {HTMLLIElement} liElement The to-do list element to be edited. 
  */
 
-import todoStore from "../../store/todo.store";
 
-export const editTodos = (liElement) => {
+export const editTodoHTML = (liElement) => {
     liElement.classList.add('editing');
     const editTodoInput = document.createElement('input');
     editTodoInput.classList.add('edit');
@@ -15,7 +14,7 @@ export const editTodos = (liElement) => {
 
     const isClickingOutside = (e) => {
         if (!e.target.closest('.editing')) {
-            liElement.classList.remove('editing')
+            liElement.classList.remove('editing');
             editTodoInput.remove();
             document.removeEventListener('click', isClickingOutside);
         }
