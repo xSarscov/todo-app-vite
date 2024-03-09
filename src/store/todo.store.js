@@ -47,7 +47,7 @@ const getTodos = (filter = Filters.All) => {
 }
 
 const addTodo = (description) => {
-    if (!description) throw new Error("Todo object description is required");
+    if (!description) throw new Error("Todo object description is required.");
 
     state.todos.push(new Todo(description));
 
@@ -55,13 +55,16 @@ const addTodo = (description) => {
 }
 
 const editTodo = (todoId, description) => {
+
+    if (!todoId || !description) throw new Error("Todo object description and id are required.");
+
     const todoIndex = state.todos.findIndex(todo => todo.id === todoId);
 
     if (todoIndex !== -1) {
         state.todos[todoIndex].description = description;
         saveStateToLocalStorage();
     } else {
-        throw new Error("Todo object provided does not exist");
+        throw new Error("Todo object provided does not exist.");
     }
 }
 
@@ -72,12 +75,14 @@ const toggleTodo = (todoId) => {
         state.todos[todoIndex].done = !state.todos[todoIndex].done;
         saveStateToLocalStorage();
     } else {
-        throw new Error("Todo object provided does not exist");
+        throw new Error("Todo object provided does not exist.");
     }
 
 }
 
 const deleteTodo = (todoId) => {
+    if (!todoId) throw new Error("Todo object id is required.");
+
     state.todos = state.todos.filter(todo => todo.id !== todoId);
     saveStateToLocalStorage();
 
@@ -87,6 +92,14 @@ const deleteCompleted = () => {
     state.todos = state.todos.filter(todo => !todo.done);
     saveStateToLocalStorage();
 
+}
+
+const searchTodos = (query) => {
+    
+    const todos = getTodos(Filters.All);
+    const matches = todos.filter(todo => todo.description.toUpperCase().includes(query.toUpperCase()));
+
+    return matches;
 }
 
 /**
@@ -100,6 +113,7 @@ const setFilter = (filter = Filters.All) => {
     } else {
         throw new Error(`${filter} does not exists.`);
     }
+
     saveStateToLocalStorage();
 }
 
@@ -114,6 +128,7 @@ export default {
     toggleTodo,
     deleteTodo,
     deleteCompleted,
+    searchTodos,
     setFilter,
     getCurrentFilter,
 }

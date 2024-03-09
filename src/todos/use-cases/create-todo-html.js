@@ -14,12 +14,15 @@ export const createTodoHTML = (todo) => {
     <div class="view">
         <input class="toggle" type="checkbox" ${isDone ? 'checked' : ''}>
         <label>${description}</label>
-        <button class="destroy"></button>
+        <button class="destroy d-flex align-items-center">
+            <i class='bx bx-trash' ></i>
+        </button>
     </div>
     `;
     const liElement = document.createElement('li');
     if (isDone) liElement.classList.add('completed');
     
+    liElement.classList.add('mb-2')
     liElement.setAttribute('data-id', id);
     liElement.innerHTML = html;
 

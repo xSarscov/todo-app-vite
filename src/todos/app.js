@@ -8,6 +8,9 @@ const ElementIds = {
     ClearCompletedButton: '.clear-completed',
     TodoFilters: '.filter',
     TodoCount: '#pending-count',
+    SearchTodoInput: '#search-todo-input',
+    ListTitle: '.list-title',
+    AddTodoSection: '.add-todo-section',
 }
 
 /**
@@ -24,7 +27,6 @@ export const app = (elementId) => {
             clearCompletedButton.style.display = 'block';
             clearCompletedButton.addEventListener('click', () => {
                 todoStore.deleteCompleted();
-                displayTodos();
             });
         }
         else {
@@ -55,6 +57,31 @@ export const app = (elementId) => {
     const newDescriptionInput = document.querySelector(ElementIds.NewTodoInput);
     const todoListUL = document.querySelector(ElementIds.TodoList);
     const filtersLi = document.querySelectorAll(ElementIds.TodoFilters);
+    const searchTodoInput = document.querySelector(ElementIds.SearchTodoInput);
+    const listTitle = document.querySelector(ElementIds.ListTitle);
+    const addTodoSection = document.querySelector(ElementIds.AddTodoSection);
+
+    // Search and display todos provided by the user
+    searchTodoInput.addEventListener('input', (event) => {
+        const query = event.target.value.trim();
+        if (query.length === 0) {
+            addTodoSection.style.display = 'block';
+            listTitle.innerText = 'Tasks';
+            displayTodos();
+            return;  
+        }
+
+        addTodoSection.style.display = 'none';
+
+        const matches = todoStore.searchTodos(query);
+        
+        listTitle.innerText = (matches.length === 0) ? `No result found for "${query}"` : `Searching for "${query}"`;
+
+        renderTodos(ElementIds.TodoList, matches);
+
+
+    });
+
     
     // Add a new todo each time the user presses enter on the input
     newDescriptionInput.addEventListener('keyup', (event) => {
@@ -70,14 +97,13 @@ export const app = (elementId) => {
     todoListUL.addEventListener('click', (event) => {
         const selectedTodoId = event.target.closest('[data-id]').dataset.id;
         
-        if (event.target.className === 'destroy') {
+        if (event.target.closest('.destroy')) {
             todoStore.deleteTodo(selectedTodoId);
-            displayTodos();
-        } else if (event.target.className === 'toggle') {
+        } else if (event.target.closest('.toggle')) {
             todoStore.toggleTodo(selectedTodoId);
-            displayTodos();
         }
-
+        
+        displayTodos();
     });
 
     // Activates todo edit mode when the user double-clicks on it and edits it when the user presses enter
@@ -100,15 +126,11 @@ export const app = (elementId) => {
 
     });
 
-
-
     // Filters todos each time the user presses one of the filter menu options and add it an active css class
     filtersLi.forEach(filterElement => {
         filterElement.addEventListener('click', (filterElement) => {
-            filtersLi.forEach(element => element.classList.remove('selected'));
-            filterElement.target.classList.add('selected');
 
-            switch(filterElement.target.id) {
+            switch(filterElement.target.closest('a').id) {
                 case 'all':
                     todoStore.setFilter(Filters.All)
                     break;
@@ -123,9 +145,6 @@ export const app = (elementId) => {
             displayTodos();
         });
     });
+   
 
-    // Sets All Filter by default
-    filtersLi.item(0).classList.add('selected');
-
-    
 }
