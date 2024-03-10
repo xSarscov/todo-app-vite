@@ -14,7 +14,7 @@ export const createTodoHTML = (todo) => {
     <div class="view">
         <input class="toggle" type="checkbox" ${isDone ? 'checked' : ''}>
         <label>${description}</label>
-        <button class="destroy d-flex align-items-center">
+        <button class="destroy">
             <i class='bx bx-trash' ></i>
         </button>
     </div>

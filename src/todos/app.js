@@ -58,9 +58,10 @@ export const app = (elementId) => {
         renderTodos(ElementIds.TodoList, todos);
         showActiveCount();
         handleDeleteCompletedButton();
+
     }
 
-    (()=> {
+    (() => {
         document.querySelector(elementId).innerHTML = htmlApp;
         displayTodos();
     })();
@@ -82,13 +83,13 @@ export const app = (elementId) => {
             addTodoSection.style.display = 'block';
             listTitle.innerText = 'Tasks';
             displayTodos();
-            return;  
+            return;
         }
 
         addTodoSection.style.display = 'none';
 
         const matches = todoStore.searchTodos(query);
-        
+
         listTitle.innerText = (matches.length === 0) ? `No result found for "${query}"` : `Searching for "${query}"`;
 
         renderTodos(ElementIds.TodoList, matches);
@@ -107,45 +108,45 @@ export const app = (elementId) => {
     //  Mark the todo as complete if the user presses the Done checkbox or removes it if the user presses the Remove button
     todoListUL.addEventListener('click', (event) => {
         const liElement = event.target.closest('[data-id]');
-        
-        if (!liElement) return;
 
-        const selectedTodoId = liElement.dataset.id;
-        
+        if (liElement) {
+            const selectedTodoId = liElement.dataset.id;
 
-        if (event.target.closest('.destroy')) {
-            todoStore.deleteTodo(selectedTodoId);
-        } else if (event.target.closest('.toggle')) {
-            todoStore.toggleTodo(selectedTodoId);
+            if (event.target.closest('button.destroy')) {
+                todoStore.deleteTodo(selectedTodoId);
+                displayTodos();
+            } else if (event.target.className === 'toggle') {
+                todoStore.toggleTodo(selectedTodoId);
+                displayTodos();
+            }
+            
         }
-        
-        displayTodos();
+
+
     });
 
     // Activates todo edit mode when the user double-clicks on it and edits it when the user presses enter
     todoListUL.addEventListener('dblclick', (event) => {
-        const selectedElement = event.target;
-        const labelElement = event.target.closest('label');
+        if (event.target.tagName === 'LABEL' && event.detail === 2) {
 
-        if (labelElement !== selectedElement) return;
-        
-        const liElement = event.target.closest('li');
-        liElement.classList.add('editing');
-        const editTodoInput = editTodoHTML(liElement);
-        
-        editTodoInput.addEventListener('keyup', (e) => {
-            if (e.key !== 'Enter') return;
-            if (e.target.value.trim().length === 0) return;
+            const liElement = event.target.closest('li');
+            liElement.classList.add('editing');
+            const editTodoInput = editTodoHTML(liElement);
+            
+            editTodoInput.addEventListener('keyup', (e) => {
+                if (e.key !== 'Enter') return;
+                if (e.target.value.trim().length === 0) return;
 
-            todoStore.editTodo(liElement.dataset.id, editTodoInput.value);
-            displayTodos();
-        });
+                todoStore.editTodo(liElement.dataset.id, editTodoInput.value);
+                displayTodos();
+            });
+        }
     });
 
     // Filters todos each time the user presses one of the filter menu options and adds an active CSS class
     filtersLi.forEach(filterElement => {
         filterElement.addEventListener('click', (filterElement) => {
-            switch(filterElement.target.closest('a').id) {
+            switch (filterElement.target.closest('a').id) {
                 case 'all':
                     todoStore.setFilter(Filters.All)
                     break;
