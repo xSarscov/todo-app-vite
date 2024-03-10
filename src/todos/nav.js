@@ -1,9 +1,10 @@
 document.addEventListener("DOMContentLoaded", function (event) {
-
+    // Shows and hide sidebar
     const showNavbar = (toggleId, navId, bodyId) => {
         const toggle = document.getElementById(toggleId),
             nav = document.getElementById(navId),
             bodypd = document.getElementById(bodyId);
+
 
         // Validate that all variables exist
         if (toggle && nav && bodypd) {
@@ -21,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
     showNavbar('header-toggle', 'nav-bar', 'body-pd');
 
-    /*===== LINK ACTIVE =====*/
+    // Add css class to sidebar links which shows the current page
     const linkColor = document.querySelectorAll('.nav_link')
 
     function colorLink() {
@@ -32,5 +33,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
     }
     linkColor.forEach(l => l.addEventListener('click', colorLink))
 
-    // Your code to run since DOM is loaded and ready
+    // Changes and saves the page theme selected by the user 
+    const toggleDarkModebutton = document.querySelectorAll('.toggle-dark-mode'),
+        toggleLightModebutton = document.querySelectorAll('.toggle-light-mode');
+
+    const getStoredTheme = localStorage.getItem('theme') || 'light';
+    const setStoredTheme = theme => localStorage.setItem('theme', theme);
+    const setTheme = theme => document.documentElement.setAttribute('data-bs-theme', theme);
+
+    toggleDarkModebutton.forEach(button => {
+        button.addEventListener('click', () => {
+            const newTheme = 'dark';
+            setStoredTheme(newTheme);
+            setTheme(newTheme);
+        });
+    });
+    
+
+    toggleLightModebutton.forEach(button => {
+        button.addEventListener('click', () => {
+            const newTheme ='light';
+            setStoredTheme(newTheme);
+            setTheme(newTheme);
+        });
+    });
+
+    setTheme(getStoredTheme);
+
 });

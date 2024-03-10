@@ -2,6 +2,11 @@ import todoStore, { Filters } from "../store/todo.store";
 import htmlApp from "./app.html?raw";
 import { editTodoHTML, renderTodos } from "./use-cases";
 
+/**
+ * IDs of elements used in the application.
+ * @readonly
+ * @enum {string}
+ */
 const ElementIds = {
     TodoList: '.todo-list',
     NewTodoInput: '#new-todo-input',
@@ -14,19 +19,21 @@ const ElementIds = {
 }
 
 /**
- * This function initializes the page
- * @param {String} elementId The id of the element where the page will be rendered
+ * Initializes the todo application.
+ * @param {string} elementId - The ID of the element where the page will be rendered.
  */
 export const app = (elementId) => {
-
-     // Handles the display of the clear completed button based on the number of completed todos and removes those todos that are completed 
-     const handleDeleteCompletedButton = () => {
+    /**
+     * Handles the display of the clear completed button.
+     */
+    const handleDeleteCompletedButton = () => {
         const clearCompletedButton = document.querySelector(ElementIds.ClearCompletedButton);
 
-        if (todoStore.getTodos(Filters.Completed).length) {
+        if (todoStore.getTodos(Filters.Completed).length > 0) {
             clearCompletedButton.style.display = 'block';
             clearCompletedButton.addEventListener('click', () => {
                 todoStore.deleteCompleted();
+                displayTodos();
             });
         }
         else {
@@ -34,14 +41,18 @@ export const app = (elementId) => {
         }
     }
 
-    // Update todo count
+    /**
+     * Updates the todo count.
+     */
     const showActiveCount = () => {
         const TodoCountText = document.querySelector(ElementIds.TodoCount);
         const todos = todoStore.getTodos(Filters.Active);
         TodoCountText.innerText = todos.length;
     }
 
-    // Displays todos according to their filter 
+    /**
+     * Displays todos according to their filter.
+     */
     const displayTodos = () => {
         const todos = todoStore.getTodos(todoStore.getCurrentFilter());
         renderTodos(ElementIds.TodoList, todos);
@@ -61,7 +72,10 @@ export const app = (elementId) => {
     const listTitle = document.querySelector(ElementIds.ListTitle);
     const addTodoSection = document.querySelector(ElementIds.AddTodoSection);
 
-    // Search and display todos provided by the user
+    /**
+     * Handles input events on the search input.
+     * @param {InputEvent} event - The input event.
+     */
     searchTodoInput.addEventListener('input', (event) => {
         const query = event.target.value.trim();
         if (query.length === 0) {
@@ -78,11 +92,8 @@ export const app = (elementId) => {
         listTitle.innerText = (matches.length === 0) ? `No result found for "${query}"` : `Searching for "${query}"`;
 
         renderTodos(ElementIds.TodoList, matches);
-
-
     });
 
-    
     // Add a new todo each time the user presses enter on the input
     newDescriptionInput.addEventListener('keyup', (event) => {
         if (event.key !== 'Enter') return;
@@ -93,10 +104,15 @@ export const app = (elementId) => {
         event.target.value = '';
     });
 
-    //  Mark the todo as complete if the user presses the Done button or removes it if the user presses the Remove button
+    //  Mark the todo as complete if the user presses the Done checkbox or removes it if the user presses the Remove button
     todoListUL.addEventListener('click', (event) => {
-        const selectedTodoId = event.target.closest('[data-id]').dataset.id;
+        const liElement = event.target.closest('[data-id]');
         
+        if (!liElement) return;
+
+        const selectedTodoId = liElement.dataset.id;
+        
+
         if (event.target.closest('.destroy')) {
             todoStore.deleteTodo(selectedTodoId);
         } else if (event.target.closest('.toggle')) {
@@ -108,28 +124,27 @@ export const app = (elementId) => {
 
     // Activates todo edit mode when the user double-clicks on it and edits it when the user presses enter
     todoListUL.addEventListener('dblclick', (event) => {
-        if (event.target.tagName === 'LABEL') {
+        const selectedElement = event.target;
+        const labelElement = event.target.closest('label');
 
-            const liElement = event.target.closest('li');
-            liElement.classList.add('editing');
-            const editTodoInput = editTodoHTML(liElement);
-            
-            editTodoInput.addEventListener('keyup', (e) => {
-                if (e.key !== 'Enter') return;
-                if (e.target.value.trim().length === 0) return;
-
-                todoStore.editTodo(liElement.dataset.id, editTodoInput.value);
-                displayTodos();
-            });
-        }
+        if (labelElement !== selectedElement) return;
         
+        const liElement = event.target.closest('li');
+        liElement.classList.add('editing');
+        const editTodoInput = editTodoHTML(liElement);
+        
+        editTodoInput.addEventListener('keyup', (e) => {
+            if (e.key !== 'Enter') return;
+            if (e.target.value.trim().length === 0) return;
 
+            todoStore.editTodo(liElement.dataset.id, editTodoInput.value);
+            displayTodos();
+        });
     });
 
-    // Filters todos each time the user presses one of the filter menu options and add it an active css class
+    // Filters todos each time the user presses one of the filter menu options and adds an active CSS class
     filtersLi.forEach(filterElement => {
         filterElement.addEventListener('click', (filterElement) => {
-
             switch(filterElement.target.closest('a').id) {
                 case 'all':
                     todoStore.setFilter(Filters.All)
@@ -145,6 +160,4 @@ export const app = (elementId) => {
             displayTodos();
         });
     });
-   
-
 }
